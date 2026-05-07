@@ -1,0 +1,295 @@
+# app.py
+# Start to Finish Running App
+# Backend + Frontend in one file for easy GitHub upload
+
+from flask import Flask, request, jsonify, render_template_string
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+running_history = []
+
+HTML_PAGE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Start to Finish</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        main {
+            width: 90%;
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: #0077cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Start to Finish</h1>
+    <p>Improve your running performance</p>
+</header>
+
+<main>
+
+    <div class="card">
+        <h2>Add Run</h2>
+
+        <input type="number" id="distance" placeholder="Distance in miles">
+
+        <input type="number" id="time" placeholder="Time in minutes">
+
+        <button onclick="addRun()">Add Run</button>
+    </div>
+
+    <div class="card">
+        <h2>Goal Setting</h2>
+
+        <select id="goalType">
+            <option value="5K">5K</option>
+            <option value="10K">10K</option>
+            <option value="Half Marathon">Half Marathon</option>
+        </select>
+
+        <input type="number" id="goalTime" placeholder="Goal race time">
+
+        <button onclick="generatePlan()">Generate Plan</button>
+
+        <div id="plan"></div>
+    </div>
+
+    <div class="card">
+        <h2>Running History</h2>
+
+        <div id="history"></div>
+    </div>
+
+    <div class="card">
+        <h2>Help & Instructions</h2>
+
+        <ul>
+            <li>Add your running distance and time.</li>
+            <li>Select your race goal.</li>
+            <li>Generate a custom training plan.</li>
+            <li>Track pace and running history.</li>
+        </ul>
+    </div>
+
+</main>
+
+<script>
+
+async function addRun() {
+
+    const distance = document.getElementById("distance").value;
+    const time = document.getElementById("time").value;
+
+    const response = await fetch("/add-run", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            distance: distance,
+            time: time
+        })
+    });
+
+    const data = await response.json();
+
+    alert(data.message);
+
+    loadHistory();
+}
+
+async function loadHistory() {
+
+    const response = await fetch("/history");
+
+    const data = await response.json();
+
+    const historyDiv = document.getElementById("history");
+
+    historyDiv.innerHTML = "";
+
+    data.forEach(run => {
+
+        historyDiv.innerHTML += `
+            <p>
+                Distance: ${run.distance} miles |
+                Time: ${run.time} mins |
+                Pace: ${run.pace} min/mile
+            </p>
+        `;
+    });
+}
+
+async function generatePlan() {
+
+    const goalType = document.getElementById("goalType").value;
+
+    const goalTime = document.getElementById("goalTime").value;
+
+    const response = await fetch("/goal-plan", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            goal_type: goalType,
+            goal_time: goalTime
+        })
+    });
+
+    const data = await response.json();
+
+    const planDiv = document.getElementById("plan");
+
+    planDiv.innerHTML = `
+        <h3>Predicted Time Improvement</h3>
+
+        <p>${data.predicted_time} minutes</p>
+
+        <h3>Training Plan</h3>
+
+        <ul>
+            ${data.training_plan.map(item => `<li>${item}</li>`).join("")}
+        </ul>
+    `;
+}
+
+loadHistory();
+
+</script>
+
+</body>
+</html>
+"""
+
+@app.route("/")
+def home():
+    return render_template_string(HTML_PAGE)
+
+@app.route("/add-run", methods=["POST"])
+def add_run():
+
+    data = request.get_json()
+
+    distance = float(data["distance"])
+    time = float(data["time"])
+
+    pace = round(time / distance, 2)
+
+    run = {
+        "distance": distance,
+        "time": time,
+        "pace": pace
+    }
+
+    running_history.append(run)
+
+    return jsonify({
+        "message": "Run added successfully!",
+        "run": run
+    })
+
+@app.route("/history")
+def history():
+    return jsonify(running_history)
+
+@app.route("/goal-plan", methods=["POST"])
+def goal_plan():
+
+    data = request.get_json()
+
+    goal_type = data["goal_type"]
+    goal_time = float(data["goal_time"])
+
+    predicted_time = round(goal_time * 0.95, 2)
+
+    if goal_type == "5K":
+        training_plan = [
+            "Monday: Easy 2 mile run",
+            "Tuesday: Speed workout",
+            "Wednesday: Rest",
+            "Thursday: Tempo run",
+            "Friday: Easy run",
+            "Saturday: Long run",
+            "Sunday: Recovery walk"
+        ]
+
+    elif goal_type == "10K":
+        training_plan = [
+            "Monday: Easy 3 mile run",
+            "Tuesday: Hill repeats",
+            "Wednesday: Cross training",
+            "Thursday: Tempo run",
+            "Friday: Recovery run",
+            "Saturday: Long run",
+            "Sunday: Rest"
+        ]
+
+    else:
+        training_plan = [
+            "Monday: Recovery run",
+            "Tuesday: Intervals",
+            "Wednesday: Strength training",
+            "Thursday: Medium long run",
+            "Friday: Rest",
+            "Saturday: Long run",
+            "Sunday: Easy jog"
+        ]
+
+    return jsonify({
+        "predicted_time": predicted_time,
+        "training_plan": training_plan
+    })
+
+if __name__ == "__main__":
+    app.run(debug=True)
