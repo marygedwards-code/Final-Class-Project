@@ -64,7 +64,6 @@ function generatePlan() {
   const sex = document.getElementById("sex").value;
   const goal = document.getElementById("goal").value;
   const injury = document.getElementById("injury").value;
-  const mileage = document.getElementById("mileage").value;
   const pace = document.getElementById("pace").value;
 
   const planType = choosePlanType(sex, goal);
@@ -74,7 +73,6 @@ function generatePlan() {
     <p><strong>Goal:</strong> ${goal.toUpperCase()}</p>
     <p><strong>Sex:</strong> ${sex}</p>
     <p><strong>Injury History:</strong> ${injury}</p>
-    <p><strong>Current Weekly Mileage:</strong> ${mileage || "Not entered"}</p>
     <p><strong>Goal Race Pace:</strong> ${pace || "Not entered"}</p>
   `;
 
