@@ -2,17 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Start to Finish Running App</title>
+
+  <!-- Cursive Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <header>
     <h1>Start to Finish</h1>
-    <p>Your personalized 8-week running training plan to race at your highest Potential</p>
+    <p>Your personalized 8-week running training plan</p>
   </header>
 
   <main>
+
     <section class="card">
       <h2>Create Your Training Plan</h2>
 
@@ -35,27 +44,30 @@
         <option value="prone">Prone to injury</option>
       </select>
 
-     
-
       <label>Goal race pace per mile</label>
       <input type="text" id="pace" placeholder="Example: 8:30" />
 
       <button onclick="generatePlan()">Generate Plan</button>
-      <button onclick="clearPlan()" class="secondary">Clear Saved Plan</button>
+
+      <button onclick="clearPlan()" class="secondary">
+        Clear Saved Plan
+      </button>
     </section>
 
     <section class="card">
       <h2>Help / Instructions</h2>
+
       <p>
         Select your sex, race goal, injury history, and goal race pace.
-        The app will generate an 8-week training plan. If you choose “prone to injury,”
-        daily mileage is reduced to make the plan safer.
+        The application will generate a personalized 8-week training plan.
+        If you choose “prone to injury,” mileage is reduced by 1 mile where possible.
       </p>
+
       <ul>
-        <li><strong>WU</strong> means warm-up.</li>
-        <li><strong>CD</strong> means cool-down.</li>
-        <li><strong>GRP</strong> means goal race pace.</li>
-        <li><strong>Strides</strong> are short controlled fast runs.</li>
+        <li><strong>WU</strong> = Warm-Up</li>
+        <li><strong>CD</strong> = Cool-Down</li>
+        <li><strong>GRP</strong> = Goal Race Pace</li>
+        <li><strong>Strides</strong> = Short fast controlled runs</li>
       </ul>
     </section>
 
@@ -76,8 +88,10 @@
 
     <section class="card">
       <h2>Your Training Plan</h2>
+
       <div id="planOutput"></div>
     </section>
+
   </main>
 
   <footer>
@@ -85,5 +99,6 @@
   </footer>
 
   <script src="script.js"></script>
+
 </body>
 </html>
