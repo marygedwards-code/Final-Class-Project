@@ -1,299 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Start to Finish</title>
-
-    <style>
-        body {
-            font-family: Arial;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #222;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        main {
-            width: 90%;
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-        }
-
-        button {
-            background-color: #0077cc;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #005fa3;
-        }
-
-        ul {
-            padding-left: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start to Finish Running App</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-
-<header>
+  <header>
     <h1>Start to Finish</h1>
-    <p>Improve your running performance</p>
-</header>
+    <p>Your personalized 8-week running training plan</p>
+  </header>
 
-<main>
+  <main>
+    <section class="card">
+      <h2>Create Your Training Plan</h2>
 
-    <div class="card">
-        <h2>Add Run</h2>
+      <label>Sex</label>
+      <select id="sex">
+        <option value="female">Female</option>
+        <option value="male">Male</option>
+      </select>
 
-        <input type="number" id="distance" placeholder="Distance in miles">
+      <label>Race Goal</label>
+      <select id="goal">
+        <option value="5k">5K</option>
+        <option value="10k">10K</option>
+        <option value="marathon">Marathon</option>
+      </select>
 
-        <input type="number" id="time" placeholder="Time in minutes">
+      <label>Injury History</label>
+      <select id="injury">
+        <option value="none">No injury history</option>
+        <option value="prone">Prone to injury</option>
+      </select>
 
-        <button onclick="addRun()">Add Run</button>
-    </div>
+      <label>Current weekly mileage</label>
+      <input type="number" id="mileage" placeholder="Example: 20" />
 
-    <div class="card">
-        <h2>Goal Setting</h2>
+      <label>Goal race pace per mile</label>
+      <input type="text" id="pace" placeholder="Example: 8:30" />
 
-        <select id="goalType">
-            <option value="5K">5K</option>
-            <option value="10K">10K</option>
-            <option value="Half Marathon">Half Marathon</option>
-            <option value="Marathon">Marathon</option>
-        </select>
+      <button onclick="generatePlan()">Generate Plan</button>
+      <button onclick="clearPlan()" class="secondary">Clear Saved Plan</button>
+    </section>
 
-        <input type="number" id="goalTime" placeholder="Goal race time in minutes">
+    <section class="card">
+      <h2>Help / Instructions</h2>
+      <p>
+        Select your sex, race goal, injury history, current mileage, and goal race pace.
+        The app will generate an 8-week training plan. If you choose “prone to injury,”
+        daily mileage is reduced to make the plan safer.
+      </p>
+      <ul>
+        <li><strong>WU</strong> means warm-up.</li>
+        <li><strong>CD</strong> means cool-down.</li>
+        <li><strong>GRP</strong> means goal race pace.</li>
+        <li><strong>Strides</strong> are short controlled fast runs.</li>
+      </ul>
+    </section>
 
-        <button onclick="generatePlan()">Generate Plan</button>
+    <section class="card">
+      <h2>Performance Tools</h2>
 
-        <div id="plan"></div>
-    </div>
+      <label>Distance Ran</label>
+      <input type="number" id="distance" placeholder="Miles" />
 
-    <div class="card">
-        <h2>Running History</h2>
+      <label>Time Ran</label>
+      <input type="text" id="time" placeholder="MM:SS or HH:MM:SS" />
 
-        <div id="history"></div>
-    </div>
+      <button onclick="calculatePace()">Calculate Pace</button>
 
-    <div class="card">
-        <h2>Help & Instructions</h2>
+      <p id="paceResult"></p>
+      <p id="nutritionResult"></p>
+    </section>
 
-        <ul>
-            <li>Add your running distance and time.</li>
-            <li>Select your race goal.</li>
-            <li>Generate a custom training plan.</li>
-            <li>Track pace and running history.</li>
-            <li>Use predicted race improvements to monitor progress.</li>
-        </ul>
-    </div>
+    <section class="card">
+      <h2>Your Training Plan</h2>
+      <div id="planOutput"></div>
+    </section>
+  </main>
 
-</main>
+  <footer>
+    <p>Start to Finish Running App | Class Project</p>
+  </footer>
 
-<script>
-
-async function addRun() {
-
-    const distance = document.getElementById("distance").value;
-    const time = document.getElementById("time").value;
-
-    const response = await fetch("/add-run", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            distance: distance,
-            time: time
-        })
-    });
-
-    const data = await response.json();
-
-    alert(data.message);
-
-    loadHistory();
-}
-
-async function loadHistory() {
-
-    const response = await fetch("/history");
-
-    const data = await response.json();
-
-    const historyDiv = document.getElementById("history");
-
-    historyDiv.innerHTML = "";
-
-    data.forEach(run => {
-
-        historyDiv.innerHTML += `
-            <p>
-                Distance: ${run.distance} miles |
-                Time: ${run.time} mins |
-                Pace: ${run.pace} min/mile
-            </p>
-        `;
-    });
-}
-
-async function generatePlan() {
-
-    const goalType = document.getElementById("goalType").value;
-
-    const goalTime = document.getElementById("goalTime").value;
-
-    const response = await fetch("/goal-plan", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            goal_type: goalType,
-            goal_time: goalTime
-        })
-    });
-
-    const data = await response.json();
-
-    const planDiv = document.getElementById("plan");
-
-    planDiv.innerHTML = `
-        <h3>Predicted Improved Time</h3>
-
-        <p>${data.predicted_time} minutes</p>
-
-        <h3>Training Plan</h3>
-
-        <ul>
-            ${data.training_plan.map(item => `<li>${item}</li>`).join("")}
-        </ul>
-    `;
-}
-
-loadHistory();
-
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
-"""
-
-@app.route("/")
-def home():
-    return render_template_string(HTML_PAGE)
-
-@app.route("/add-run", methods=["POST"])
-def add_run():
-
-    data = request.get_json()
-
-    distance = float(data["distance"])
-    time = float(data["time"])
-
-    pace = round(time / distance, 2)
-
-    run = {
-        "distance": distance,
-        "time": time,
-        "pace": pace
-    }
-
-    running_history.append(run)
-
-    return jsonify({
-        "message": "Run added successfully!",
-        "run": run
-    })
-
-@app.route("/history")
-def history():
-    return jsonify(running_history)
-
-@app.route("/goal-plan", methods=["POST"])
-def goal_plan():
-
-    data = request.get_json()
-
-    goal_type = data["goal_type"]
-    goal_time = float(data["goal_time"])
-
-    predicted_time = round(goal_time * 0.95, 2)
-
-    if goal_type == "5K":
-
-        training_plan = [
-            "Monday: Easy 2 mile run",
-            "Tuesday: Speed workout",
-            "Wednesday: Rest",
-            "Thursday: Tempo run",
-            "Friday: Easy run",
-            "Saturday: Long run",
-            "Sunday: Recovery walk"
-        ]
-
-    elif goal_type == "10K":
-
-        training_plan = [
-            "Monday: Easy 3 mile run",
-            "Tuesday: Hill repeats",
-            "Wednesday: Cross training",
-            "Thursday: Tempo run",
-            "Friday: Recovery run",
-            "Saturday: Long run",
-            "Sunday: Rest"
-        ]
-
-    elif goal_type == "Half Marathon":
-
-        training_plan = [
-            "Monday: Recovery run",
-            "Tuesday: Intervals",
-            "Wednesday: Strength training",
-            "Thursday: Medium long run",
-            "Friday: Rest",
-            "Saturday: Long run",
-            "Sunday: Easy jog"
-        ]
-
-    else:
-
-        training_plan = [
-            "Monday: Recovery run",
-            "Tuesday: Speed intervals",
-            "Wednesday: Medium distance run",
-            "Thursday: Tempo run",
-            "Friday: Rest or cross training",
-            "Saturday: Long endurance run",
-            "Sunday: Easy recovery run"
-        ]
-
-    return jsonify({
-        "predicted_time": predicted_time,
-        "training_plan": training_plan
-    })
-
-if __name__ == "__main__":
-    app.run(debug=True)
